@@ -36,6 +36,9 @@ export const queryPackages = async (filter: Record<string, any>, options: IOptio
 export const trackPackageById = async (id: string): Promise<{ package: any; delivery: any } | null> => {
   const retrievedPackage = await getPackageById(id);
 
+  if(!retrievedPackage) {
+    throw new ApiError(404, 'Package does not exit')
+  }
   const delivery = await Delivery.findOne({ package_id: retrievedPackage?.package_id });
 
   return {

@@ -35,7 +35,7 @@
   </div>
 
 <script type="module">
-import { io } from "http://cdn.socket.io/4.7.5/socket.io.esm.min.js";
+import { io } from "https://cdn.socket.io/4.7.5/socket.io.esm.min.js";
 
 // Function to initialize the map
 function initMap() {
@@ -86,14 +86,14 @@ document.getElementById('track-button').addEventListener('click', async () => {
 
   try {
     // Fetch package details
-    const packageResponse = await fetch(`http://localhost:3000/v1/package/${packageId}`);
+    const packageResponse = await fetch(`https://packagetracker-tj2e.onrender.com/v1/package/${packageId}`);
     const packageData = await packageResponse.json();
     displayPackageInfo(packageData.package);
 
       displayDeliveryInfo(packageData.delivery);
 
       // Initialize WebSocket connection
-      const socket = io.connect('http://localhost:3000', { rejectUnauthorized: false });
+      const socket = io.connect('https://packagetracker-tj2e.onrender.com', { rejectUnauthorized: false });
 
       socket.on('location_changed', ({ delivery_id, location }) => {
         if (delivery_id === packageData.active_delivery_id) {

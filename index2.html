@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Package Tracking</title>
+  <style>
+    #package-details, #delivery-details {
+      margin-bottom: 1rem;
+    }
+
+    #map {
+      height: 400px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="tracking-container">
+    <h1>Track Your Package</h1>
+    <input type="text" id="package-id" placeholder="Enter Package ID" />
+    <button id="track-button">Track</button>
+
+    <div id="package-details">
+      <h2>Package Details</h2>
+      <div id="package-info"></div>
+    </div>
+
+    <div id="delivery-details">
+      <h2>Delivery Details</h2>
+      <div id="delivery-info"></div>
+    </div>
+
+    <div id="map"></div>
+  </div>
+
+<script type="module">
+import { io } from "http://cdn.socket.io/4.7.5/socket.io.esm.min.js";
+
+// Function to initialize the map
+function initMap() {
+  // Replace with actual map initialization code
+  // This example uses Leaflet
+  // Example: L.map('map').setView([0, 0], 13);
+}
+
+// Function to display package details
+function displayPackageInfo(packageInfo) {
+  const packageInfoDiv = document.getElementById('package-info');
+  packageInfoDiv.innerHTML = `
+    <strong>Package ID: ${packageInfo.package_id}</strong><br>
+    From: ${packageInfo.from_name}, ${packageInfo.from_address}<br>
+    To: ${packageInfo.to_name}, ${packageInfo.to_address}<br>
+    Dimensions: ${packageInfo.height} x ${packageInfo.depth} x ${packageInfo.width}<br>
+  `;
+}
+
+// Function to display delivery details
+function displayDeliveryInfo(deliveryInfo) {
+  const deliveryInfoDiv = document.getElementById('delivery-info');
+  deliveryInfoDiv.innerHTML = `
+    <strong>Delivery ID: ${deliveryInfo.delivery_id}</strong><br>
+    Package ID: ${deliveryInfo.package_id}<br>
+    Location: Lat ${deliveryInfo.location.lat}, Lng ${deliveryInfo.location.lng}<br>
+    Status: ${deliveryInfo.status}<br>
+    Pickup Time: ${deliveryInfo.pickup_time || 'N/A'}<br>
+    Start Time: ${deliveryInfo.start_time || 'N/A'}<br>
+    End Time: ${deliveryInfo.end_time || 'N/A'}<br>
+  `;
+}
+
+// Function to update map location
+function updateMap(location) {
+  // Update the map with the package source, destination, and current location
+  // Example using Leaflet
+  // L.marker([location.lat, location.lng]).addTo(map).bindPopup('Current Location');
+}
+
+document.getElementById('track-button').addEventListener('click', async () => {
+  const packageId = document.getElementById('package-id').value;
+
+  if (!packageId) {
+    alert('Please enter a package ID');
+    return;
+  }
+
+  try {
+    // Fetch package details
+    const packageResponse = await fetch(`http://localhost:3000/v1/package/${packageId}`);
+    const packageData = await packageResponse.json();
+    displayPackageInfo(packageData.package);
+
+      displayDeliveryInfo(packageData.delivery);
+
+      // Initialize WebSocket connection
+      const socket = io.connect('http://localhost:3000', { rejectUnauthorized: false });
+
+      socket.on('location_changed', ({ delivery_id, location }) => {
+        if (delivery_id === packageData.active_delivery_id) {
+          updateMap(location);
+          displayDeliveryInfo({ ...deliveryData, location });
+        }
+      });
+
+      socket.on('status_changed', ({ delivery_id, status }) => {
+        if (delivery_id === packageData.active_delivery_id) {
+          displayDeliveryInfo({ ...deliveryData, status });
+        }
+      });
+
+      socket.on('delivery_updated', (updatedDelivery) => {
+        if (updatedDelivery.delivery_id === packageData.active_delivery_id) {
+          displayDeliveryInfo(updatedDelivery);
+          updateMap(updatedDelivery.location);
+        }
+      });
+
+  } catch (error) {
+    console.error('Error fetching package or delivery details:', error);
+  }
+});
+
+// Initialize the map when the page loads
+initMap();
+</script>
+</body>
+</html>

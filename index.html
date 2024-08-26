@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-time Delivery Updates</title>
+  <style>
+    #delivery-list {
+      margin-bottom: 1rem;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #delivery-list li {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 5px;
+      border-radius: 4px;
+    }
+
+    #delivery-list li strong {
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>Track Your Package</h1>
+    <input type="text" id="package-id" placeholder="Enter Package ID" />
+    <button id="track-button">Track</button>
+  </div>
+  <div id="delivery-container">
+    <h1>Real-time Delivery Updates</h1>
+    <ul id="delivery-list"></ul>
+  </div>
+
+<script type="module">
+import { io } from "http://cdn.socket.io/4.7.5/socket.io.esm.min.js";
+
+const socket = io.connect('http://localhost:3000', { rejectUnauthorized: false });
+
+const deliveryList = document.getElementById('delivery-list');
+
+const createDeliveryItem = (delivery, status) => {
+  const deliveryListItem = document.createElement('li');
+  deliveryListItem.innerHTML = `
+    <strong>Delivery ID: ${delivery.delivery_id}</strong><br>
+    Package ID: ${delivery.package_id}<br>
+    Location: Lat ${delivery.location.lat}, Lng ${delivery.location.lng}<br>
+    Status: ${status}<br>
+    Pickup Time: ${delivery.pickup_time || 'N/A'}<br>
+    Start Time: ${delivery.start_time || 'N/A'}<br>
+    End Time: ${delivery.end_time || 'N/A'}<br>
+  `;
+  deliveryListItem.dataset.deliveryId = delivery.delivery_id;
+  return deliveryListItem;
+};
+
+// Handle location updates
+socket.on('location_changed', ({ delivery_id, location }) => {
+  let deliveryItem = deliveryList.querySelector(`li[data-delivery-id="${delivery_id}"]`);
+  if (deliveryItem) {
+    deliveryItem.querySelector('br').insertAdjacentHTML('afterend', `Updated Location: Lat ${location.lat}, Lng ${location.lng}<br>`);
+  } else {
+    console.warn(`Delivery with ID "${delivery_id}" not found for location update.`);
+  }
+});
+
+// Handle status changes
+socket.on('status_changed', ({ delivery_id, status }) => {
+  let deliveryItem = deliveryList.querySelector(`li[data-delivery-id="${delivery_id}"]`);
+  if (deliveryItem) {
+    deliveryItem.innerHTML = `
+      <strong>Delivery ID: ${delivery_id}</strong><br>
+      Status: ${status}<br>
+      Pickup Time: ${status === 'picked-up' ? new Date().toISOString() : deliveryItem.querySelector('br:nth-of-type(4)').textContent}<br>
+      Start Time: ${status === 'in-transit' ? new Date().toISOString() : deliveryItem.querySelector('br:nth-of-type(5)').textContent}<br>
+      End Time: ${['delivered', 'failed'].includes(status) ? new Date().toISOString() : deliveryItem.querySelector('br:nth-of-type(6)').textContent}<br>
+    `;
+  } else {
+    console.warn(`Delivery with ID "${delivery_id}" not found for status update.`);
+  }
+});
+
+// Handle delivery updates
+socket.on('delivery_updated', (updatedDelivery) => {
+  let deliveryItem = deliveryList.querySelector(`li[data-delivery-id="${updatedDelivery.delivery_id}"]`);
+  if (deliveryItem) {
+    deliveryItem.innerHTML = `
+      <strong>Delivery ID: ${updatedDelivery.delivery_id}</strong><br>
+      Package ID: ${updatedDelivery.package_id}<br>
+      Location: Lat ${updatedDelivery.location.lat}, Lng ${updatedDelivery.location.lng}<br>
+      Status: ${updatedDelivery.status}<br>
+      Pickup Time: ${updatedDelivery.pickup_time || 'N/A'}<br>
+      Start Time: ${updatedDelivery.start_time || 'N/A'}<br>
+      End Time: ${updatedDelivery.end_time || 'N/A'}<br>
+    `;
+  } else {
+    const deliveryItem = createDeliveryItem(updatedDelivery, updatedDelivery.status);
+    deliveryList.appendChild(deliveryItem);
+  }
+});
+</script>
+</body>
+</html>

@@ -57,13 +57,14 @@ export const queryPublishedDeliverys = async (filter: Record<string, any>, optio
  * @returns {Promise<IPackageDoc | null>}
  */
 export const trackDeliveryById = async (id: string): Promise<{ package: any; delivery: any } | null> => {
-  const retrievedPackage = await getDeliveryById(id);
+  const delivery = await getDeliveryById(id);
 
-  const delivery = await Delivery.findOne({ package_id: retrievedPackage?.package_id });
+  if(!delivery) throw new ApiError(404, "delivery not found")
+  const retrievedPackage = await Package.findOne({ package_id: delivery?.package_id });
 
   return {
     package: retrievedPackage,
-    delivery: delivery ? delivery : 'No active delivery for this package.',
+    delivery: delivery
   };
 };
 

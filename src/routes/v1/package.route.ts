@@ -1,20 +1,20 @@
 import express, { Router } from 'express';
 import { validate } from '../../modules/validate';
-import { auth } from '../../modules/auth';
+// import { auth } from '../../modules/auth';
 import { packageController, packageValidation } from '../../modules/package';
 
 const router: Router = express.Router();
 
 router
   .route('/')
-  .post(auth('createPackage'), validate(packageValidation.createPackage), packageController.createPackage)
-  .get(auth('getPackages'), validate(packageValidation.getPackages), packageController.getPackages);
+  .post(validate(packageValidation.createPackage), packageController.createPackage)
+  .get(validate(packageValidation.getPackages), packageController.getPackages);
 
 router
   .route('/:packageId')
   .get(validate(packageValidation.getPackage), packageController.trackPackage)
-  .put(auth('updatePackage'), validate(packageValidation.updatePackage), packageController.updatePackage)
-  .delete(auth('deletePackage'), validate(packageValidation.deletePackage), packageController.deletePackage);
+  .put(validate(packageValidation.updatePackage), packageController.updatePackage)
+  .delete(validate(packageValidation.deletePackage), packageController.deletePackage);
 
 export default router;
 
@@ -32,8 +32,6 @@ export default router;
  *     summary: Create new package
  *     description: Admin can create a package.
  *     tags: [Package]
- *     security:
- *      - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -139,8 +137,6 @@ export default router;
  *     summary: Get all packages
  *     description: Retrieve all packages with optional filters.
  *     tags: [Package]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: active_delivery_id
@@ -249,8 +245,6 @@ export default router;
  *        description: The unique identifier of the package to update.
  *        schema:
  *          type: string
- *     security:
- *      - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -353,8 +347,6 @@ export default router;
  *     summary: Delete a package
  *     description: Delete a specific package using its unique package ID.
  *     tags: [Package]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: packageId

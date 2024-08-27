@@ -4,7 +4,7 @@ import ApiError from '../errors/ApiError';
 import { IOptions, QueryResult } from '../paginate/paginate';
 import { NewPackage, IPackageDoc, UpdatePackageBody } from './package.interfaces';
 import { generateReadableId } from '../utils/generateUniqueId';
-import { Delivery } from '../delivery';
+// import { Delivery } from '../delivery';
 
 /**
  * Create a package
@@ -27,24 +27,40 @@ export const queryPackages = async (filter: Record<string, any>, options: IOptio
   return packages;
 };
 
-
 /**
- * Track package by id
+ * Track package by id using MongoDB aggregation
  * @param {string} id
- * @returns {Promise<IPackageDoc | null>}
+ * @returns {Promise<{ package: any; delivery: any } | null>}
  */
-export const trackPackageById = async (id: string): Promise<{ package: any; delivery: any } | null> => {
-  const retrievedPackage = await getPackageById(id);
+export const trackPackageById = async (id: string): Promise<{ package: any } | null> => {
+  const pipeline = [
+    {
+      $lookup: {
+        from: 'deliveries',
+        localField: 'active_delivery_id',
+        foreignField: 'delivery_id',
+        as: 'delivery',
+      },
+    },
+    {
+      $unwind: {
+        path: '$delivery',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $match: {
+        package_id: id,
+      },
+    },
+  ];
+  const result = await Package.aggregate(pipeline);
 
-  if(!retrievedPackage) {
-    throw new ApiError(404, 'Package does not exist')
+  if (result.length === 0) {
+    throw new ApiError(404, 'Package does not exist');
   }
-  const delivery = await Delivery.findOne({ package_id: retrievedPackage?.package_id });
 
-  return {
-    package: retrievedPackage,
-    delivery: delivery ? delivery : 'No active delivery for this package.',
-  };
+  return result[0];
 };
 
 /**

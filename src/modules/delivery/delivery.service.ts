@@ -18,12 +18,12 @@ export const createDelivery = async (reqBody: NewCreatedDelivery): Promise<IDeli
     throw new ApiError(404, 'Package not found');
   }
 
-  if(existingPackage.active_delivery_id){
+  if (existingPackage.active_delivery_id) {
     throw new ApiError(400, 'There is an active delivery on this Package');
   }
-  
+
   const deliveryBody = { delivery_id: generateReadableId('delivery'), ...reqBody };
-  
+
   await Package.updateOne({ package_id: reqBody.package_id }, { active_delivery_id: deliveryBody.delivery_id });
 
   return Delivery.create(deliveryBody);
@@ -41,40 +41,45 @@ export const queryDeliverys = async (filter: Record<string, any>, options: IOpti
 };
 
 /**
- * Query for published deliveries
- * @param {Object} filter - Mongo filter
- * @param {Object} options - Query options
- * @returns {Promise<QueryResult>}
- */
-export const queryPublishedDeliverys = async (filter: Record<string, any>, options: IOptions): Promise<QueryResult> => {
-  const deliveries = await Delivery.paginate(filter, options);
-  return deliveries;
-};
-
-/**
- * Get package by id
+ * Get package and delivery information using MongoDB aggregation
  * @param {string} id
- * @returns {Promise<IPackageDoc | null>}
+ * @returns {Promise<{ package: any; delivery: any } | null>}
  */
-export const trackDeliveryById = async (id: string): Promise<{ package: any; delivery: any } | null> => {
-  const delivery = await getDeliveryById(id);
+export const trackDeliveryById = async (id: string): Promise<{ package: any; } | null> => {
+  const pipeline = [
+    {
+      $lookup: {
+        from: 'deliveries',
+        localField: 'active_delivery_id',
+        foreignField: 'delivery_id',
+        as: 'delivery',
+      },
+    },
+    {
+      $unwind: '$delivery',
+    },
+    {
+      $match: {
+        'delivery.delivery_id': id,
+      },
+    },
+  ];
 
-  if(!delivery) throw new ApiError(404, "delivery not found")
-  const retrievedPackage = await Package.findOne({ package_id: delivery?.package_id });
+  const result = await Package.aggregate(pipeline);
 
-  return {
-    package: retrievedPackage,
-    delivery: delivery
-  };
+  if (result.length === 0) {
+    throw new ApiError(404, 'Delivery not found');
+  }
+
+  return result[0]
 };
-
 
 /**
  * Get delivery by id
  * @param {string} id
  * @returns {Promise<IDeliveryDoc | null>}
  */
-export const getDeliveryById = async (id: string): Promise<IDeliveryDoc | null> => Delivery.findOne({delivery_id: id});
+export const getDeliveryById = async (id: string): Promise<IDeliveryDoc | null> => Delivery.findOne({ delivery_id: id });
 
 /**
  * Update delivery by id
@@ -83,7 +88,7 @@ export const getDeliveryById = async (id: string): Promise<IDeliveryDoc | null> 
  * @returns {Promise<IDeliveryDoc | null>}
  */
 export const updateDeliveryById = async (
-  deliveryId:string,
+  deliveryId: string,
   updateBody: UpdateDeliveryBody
 ): Promise<IDeliveryDoc | null> => {
   const delivery = await getDeliveryById(deliveryId);

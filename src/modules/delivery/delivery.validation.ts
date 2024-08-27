@@ -4,13 +4,6 @@ import { DELIVERY_STATUS_ENUM } from './deliveryStatusEnum';
 
 const createDeliveryBody: Record<keyof NewCreatedDelivery, any> = {
   package_id: Joi.string().required(),
-  pickup_time: Joi.date(),
-  start_time: Joi.date(),
-  end_time: Joi.date(),
-  location: Joi.object({
-    lat: Joi.number().required(),
-    lng: Joi.number().required(),
-  }).required()
 };
 
 export const createDelivery = {

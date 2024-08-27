@@ -13,7 +13,7 @@ const packageSchema = new mongoose.Schema<IPackageDoc, IPackageModel>(
     },
     active_delivery_id: {
       type: String,
-      trim: true,
+      ref: 'deliveries',
     },
     description: {
       type: String,

@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import { NewPackage } from './package.interfaces';
+import { DELIVERY_STATUS_ENUM } from '../delivery/deliveryStatusEnum';
 
 const locationSchema = Joi.object({
   lat: Joi.number().required(),
@@ -59,6 +60,7 @@ export const updatePackage = {
       height: Joi.number(),
       depth: Joi.number(),
       width: Joi.number(),
+      status: Joi.string().valid(DELIVERY_STATUS_ENUM.Open, DELIVERY_STATUS_ENUM.Delivered, DELIVERY_STATUS_ENUM.Failed, DELIVERY_STATUS_ENUM.InTransit, DELIVERY_STATUS_ENUM.PickUp)
     })
     .min(1),
 };

@@ -5,7 +5,6 @@ import ApiError from '../errors/ApiError';
 import pick from '../utils/pick';
 import { IOptions } from '../paginate/paginate';
 import * as deliveryService from './delivery.service';
-// import { io } from '../../index';
 
 export const createDelivery = catchAsync(async (req: Request, res: Response) => {
   const delivery = await deliveryService.createDelivery(req.body);

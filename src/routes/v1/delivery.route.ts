@@ -1,20 +1,20 @@
 import express, { Router } from 'express';
 import { validate } from '../../modules/validate';
-import { auth } from '../../modules/auth';
+// import { auth } from '../../modules/auth';
 import { deliveryController, deliveryValidation } from '../../modules/delivery';
 
 const router: Router = express.Router();
 
 router
   .route('/')
-  .post(auth('createDelivery'), validate(deliveryValidation.createDelivery), deliveryController.createDelivery)
-  .get(auth('getDeliveries'), validate(deliveryValidation.getDeliveries), deliveryController.getDeliverys);
+  .post(validate(deliveryValidation.createDelivery), deliveryController.createDelivery)
+  .get(validate(deliveryValidation.getDeliveries), deliveryController.getDeliverys);
 
 router
   .route('/:deliveryId')
   .get(validate(deliveryValidation.getDelivery), deliveryController.trackDelivery)
-  .put(auth('updateDelivery'), validate(deliveryValidation.updateDelivery), deliveryController.updateDelivery)
-  .delete(auth('deleteDelivery'), validate(deliveryValidation.deleteDelivery), deliveryController.deleteDelivery);
+  .put(validate(deliveryValidation.updateDelivery), deliveryController.updateDelivery)
+  .delete(validate(deliveryValidation.deleteDelivery), deliveryController.deleteDelivery);
 
 export default router;
 
@@ -33,8 +33,6 @@ export default router;
  *     summary: Create a new delivery
  *     description: Allows the creation of a new delivery entry, including package information, pickup, start, and end times, location details, and status.
  *     tags: [Delivery]
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -43,58 +41,12 @@ export default router;
  *             type: object
  *             required:
  *               - package_id
- *               - location
  *             properties:
- *               delivery_id:
- *                 type: string
- *                 description: Unique identifier for the delivery.
  *               package_id:
  *                 type: string
  *                 description: ID of the package associated with the delivery.
- *               pickup_time:
- *                 type: string
- *                 format: date-time
- *                 description: The time when the package was picked up.
- *               start_time:
- *                 type: string
- *                 format: date-time
- *                 description: The time when the delivery process started.
- *               end_time:
- *                 type: string
- *                 format: date-time
- *                 description: The time when the delivery was completed.
- *               location:
- *                 type: object
- *                 required:
- *                   - lat
- *                   - lng
- *                 properties:
- *                   lat:
- *                     type: number
- *                     description: Latitude of the delivery location.
- *                   lng:
- *                     type: number
- *                     description: Longitude of the delivery location.
- *               status:
- *                 type: string
- *                 enum:
- *                   - Open
- *                   - PickUp
- *                   - InTransit
- *                   - Delivered
- *                   - Failed
- *                 default: Open
- *                 description: Current status of the delivery.
  *             example:
- *               delivery_id: "d12345"
- *               package_id: "p12345"
- *               pickup_time: "2024-08-25T10:00:00Z"
- *               start_time: "2024-08-25T10:15:00Z"
- *               end_time: "2024-08-25T11:00:00Z"
- *               location:
- *                 lat: 40.7128
- *                 lng: -74.0060
- *               status: InTransit
+ *               package_id: "DELA17244"
  *     responses:
  *       "201":
  *         description: Delivery created successfully
@@ -121,8 +73,6 @@ export default router;
  *     summary: Get all deliveries
  *     description: Retrieves a list of all deliveries with optional filtering, sorting, and pagination.
  *     tags: [Delivery]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: status
@@ -322,8 +272,6 @@ export default router;
  *     summary: Update a delivery
  *     description: Updates the details of a specific delivery using its unique delivery ID.
  *     tags: [Delivery]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: deliveryId
@@ -434,7 +382,6 @@ export default router;
  *                 message: "Delivery not found"
  */
 
-
 /**
  * @swagger
  * /delivery/{deliveryId}:
@@ -442,8 +389,6 @@ export default router;
  *     summary: Delete a delivery
  *     description: Delete a specific delivery using its unique package ID.
  *     tags: [Delivery]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: deliveryId

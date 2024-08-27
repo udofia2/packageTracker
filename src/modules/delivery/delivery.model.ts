@@ -13,6 +13,7 @@ const deliverySchema = new mongoose.Schema<IDeliveryDoc, IDeliveryModel>({
   },
   package_id: {
     type: String,
+    ref: 'packages',
     trim: true,
   },
   pickup_time: {
@@ -35,7 +36,6 @@ const deliverySchema = new mongoose.Schema<IDeliveryDoc, IDeliveryModel>({
         required: true,
       },
     },
-    required: true,
   },
   status: {
     type: String,

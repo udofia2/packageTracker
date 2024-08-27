@@ -26,4 +26,4 @@ export interface IDeliveryModel extends Model<IDeliveryDoc> {
 export type UpdateDeliveryBody = Partial<IDelivery>;
 export type ModelDeliveryTest = Partial<IDelivery>;
 
-export type NewCreatedDelivery = Omit<IDelivery, 'status' | "delivery_id">;
+export type NewCreatedDelivery = Omit<IDelivery, 'status' | 'delivery_id' | 'pickup_time' | 'start_time' | 'end_time' | 'location'>;

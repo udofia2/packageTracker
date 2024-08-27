@@ -6,7 +6,7 @@ const swaggerDefinition = {
     title: 'A logistics system management API documentation',
     version: '0.0.1',
     description:
-      'This is a logistic management system that allows drivers and customers to track packages in realtime as the driver move across the map',
+      'This is a logistic management system that allows drivers and customers to track packages in realtime as the driver move across the map \n\n\n',
     license: {
       name: 'MIT',
       url: '',
@@ -18,8 +18,8 @@ const swaggerDefinition = {
       description: 'Development Server',
     },
     {
-      url: ``,
-      description: 'Test Server',
+      url: `https://packagetracker-tj2e.onrender.com/v1`,
+      description: 'Live Server',
     },
   ],
 };

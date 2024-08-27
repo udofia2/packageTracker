@@ -117,6 +117,9 @@ document.getElementById('track-button').addEventListener('click', async () => {
 
   } catch (error) {
     console.error('Error fetching package or delivery details:', error);
+      const packageInfoDiv = document.getElementById('package-info');
+  packageInfoDiv.innerHTML = `
+    <strong>Package ID: ${error.message}</strong><br>`
   }
 });
 

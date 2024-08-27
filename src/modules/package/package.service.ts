@@ -37,7 +37,7 @@ export const trackPackageById = async (id: string): Promise<{ package: any; deli
   const retrievedPackage = await getPackageById(id);
 
   if(!retrievedPackage) {
-    throw new ApiError(404, 'Package does not exit')
+    throw new ApiError(404, 'Package does not exist')
   }
   const delivery = await Delivery.findOne({ package_id: retrievedPackage?.package_id });
 

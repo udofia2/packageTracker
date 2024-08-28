@@ -20,16 +20,52 @@ export const io = new Server(server, {
 
 io.on('connection', (socket) => {
   logger.info('A client connected');
-  socket.on('location_changed', async (data) => {
-    try {
-      const { delivery_id, location } = data;
-      const updatedDelivery = await Delivery.findByIdAndUpdate(delivery_id, { location }, { new: true });
+socket.on('location_changed', async (data) => {
+  try {
+    const { delivery_id, location } = data;
 
-      io.emit('delivery_updated', updatedDelivery);
-    } catch (error) {
-      console.error('Error handling location update:', error);
+    const delivery = await Delivery.findOne({ delivery_id });
+    if (!delivery) {
+      return socket.emit('error', { message: 'Delivery not found' });
     }
-  });
+
+    const updatedDelivery = await Delivery.findOneAndUpdate({ delivery_id }, { location }, { new: true });
+
+    if (!updatedDelivery) {
+      return console.error('Delivery not updated successfully');
+    }
+
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'deliveries',
+          localField: 'active_delivery_id',
+          foreignField: 'delivery_id',
+          as: 'delivery',
+        },
+      },
+      {
+        $unwind: '$delivery',
+      },
+      {
+        $match: {
+          'delivery.delivery_id': delivery_id,
+        },
+      },
+    ];
+
+    const updatedPackage = await Package.aggregate(pipeline, {
+      allowDiskUse: true,
+    });
+
+    io.emit('delivery_updated', {
+      event: 'delivery_updated',
+      delivery: updatedPackage[0].delivery,
+    });
+  } catch (error) {
+    console.error('Error handling location update:', error);
+  }
+});
 
 socket.on('status_changed', async (data) => {
   try {
@@ -57,11 +93,11 @@ socket.on('status_changed', async (data) => {
     const updatedDelivery = await Delivery.findOneAndUpdate(
       { delivery_id },
       updateFields,
-      { new: true } // Ensure you get the updated document
+      { new: true } 
     );
 
     if (!updatedDelivery) {
-      return console.error('Delivery not updated successfully'); // Handle update failure
+      return console.error('Delivery not updated successfully'); 
     }
 
     const pipeline = [
@@ -83,9 +119,9 @@ socket.on('status_changed', async (data) => {
       },
     ];
 
-    // Use the updated delivery information in the pipeline
+
     const updatedPackage = await Package.aggregate(pipeline, {
-      allowDiskUse: true, // Enable disk usage if necessary
+      allowDiskUse: true, 
     });
 
     io.emit('delivery_updated', { event: 'delivery_updated', delivery: updatedPackage[0].delivery });

@@ -1,6 +1,5 @@
 import express, { Router } from 'express';
 import { validate } from '../../modules/validate';
-// import { auth } from '../../modules/auth';
 import { packageController, packageValidation } from '../../modules/package';
 
 const router: Router = express.Router();

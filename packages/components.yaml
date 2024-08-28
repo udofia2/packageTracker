@@ -50,7 +50,7 @@ components:
         id: 5ebac534954b54139806c112
         package_id: PKG123456
         active_delivery_id: DEL78910
-        description: "A package containing fragile items."
+        description: 'A package containing fragile items.'
         from_name: John Doe
         from_address: 123 Elm Street
         from_location: Springfield
@@ -60,115 +60,17 @@ components:
         height: 10
         depth: 5
         width: 8
+    
     Delivery:
       type: object
       properties:
-        id:
-          type: string
         package_id:
           type: string
           description: Unique identifier for the package.
-        delivery_id:
-          type: string
-          description: ID of the active delivery associated with the package.
-        description:
-          type: string
-          description: Detailed description of the package.
-        from_name:
-          type: string
-          description: Name of the sender.
-        from_address:
-          type: string
-          description: Address of the sender.
-        from_location:
-          type: string
-          description: Location of the sender.
-        to_name:
-          type: string
-          description: Name of the recipient.
-        to_address:
-          type: string
-          description: Address of the recipient.
-        to_location:
-          type: string
-          description: Location of the recipient.
-        height:
-          type: number
-          default: 0
-          description: Height of the package.
-        depth:
-          type: number
-          default: 0
-          description: Depth of the package.
-        width:
-          type: number
-          default: 0
-          description: Width of the package.
       required:
         - package_id
       example:
-        id: 5ebac534954b54139806c112
         package_id: PKG123456
-        active_delivery_id: DEL78910
-        description: "A package containing fragile items."
-        from_name: John Doe
-        from_address: 123 Elm Street
-        from_location: Springfield
-        to_name: Jane Smith
-        to_address: 456 Oak Avenue
-        to_location: Shelbyville
-        height: 10
-        depth: 5
-        width: 8
-
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-        email:
-          type: string
-          format: email
-        firstName:
-          type: string
-        lastName:
-          type: string
-        role:
-          type: string
-          enum: [user, admin]
-      example:
-        id: 5ebac534954b54139806c112
-        email: fake@example.com
-        name: fake name
-        role: user
-
-    Token:
-      type: object
-      properties:
-        token:
-          type: string
-        expires:
-          type: string
-          format: date-time
-      example:
-        token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJhYzUzNDk1NGI1NDEzOTgwNmMxMTIiLCJpYXQiOjE1ODkyOTg0ODQsImV4cCI6MTU4OTMwMDI4NH0.m1U63blB0MLej_WfB7yC2FTMnCziif9X8yzwDEfJXAg
-        expires: 2020-05-12T16:18:04.793Z
-
-    AuthTokens:
-      type: object
-      properties:
-        access:
-          $ref: '#/components/schemas/Token'
-        refresh:
-          $ref: '#/components/schemas/Token'
-
-    UserWithTokens:
-      type: object
-      properties:
-        user:
-          $ref: '#/components/schemas/User'
-        tokens:
-          $ref: '#/components/schemas/AuthTokens'
 
     Error:
       type: object

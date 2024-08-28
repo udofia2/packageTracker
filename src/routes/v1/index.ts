@@ -2,7 +2,6 @@ import express, { Router } from 'express';
 import docsRoute from './swagger.route';
 import packageRoute from './package.route';
 import deliveryRoute from './delivery.route';
-// import config from '../../config/config';
 
 const router = express.Router();
 
